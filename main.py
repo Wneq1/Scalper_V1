@@ -89,7 +89,7 @@ def run_scraper():
             
             # Dodajemy wyniki z tego serwisu do puli, przycinając do limitu
             finalne_z_serwisu = collected_for_service[:MAX_OFERT]
-            print(f"   [{nazwa_serwisu}] Zukces! Dodano {len(finalne_z_serwisu)} ofert.")
+            print(f"   [{nazwa_serwisu}] Sukces! Dodano {len(finalne_z_serwisu)} ofert.")
             wszystkie_oferty.extend(finalne_z_serwisu)
 
     # 3. Zapis do Excela
