@@ -1,12 +1,11 @@
 # 🛒 Inteligentny Scalper Ofert (Smart Edition)
 
-To zaawansowany robot do wyszukiwania okazji na polskich i zagranicznych portalach aukcyjnych.
-Program automatycznie pobiera, filtruje i ocenia oferty, odrzucając "śmieci" (akcesoria, uszkodzone, błędne opisy).
+Zaawansowany robot do automatycznego wyszukiwania najlepszych okazji na polskich i zagranicznych portalach aukcyjnych. Program nie tylko pobiera oferty, ale inteligentnie je analizuje, odrzucając "śmieci" (akcesoria, uszkodzone przedmioty) i sortując wyniki według opłacalności.
 
 ## 🌍 Obsługiwane serwisy
-- **Allegro**
+- **Allegro** (wraz z analizą sekcji "Stan")
 - **Allegro Lokalnie**
-- **OLX**
+- **OLX** (z obsługą dynamicznej paginacji)
 - **Vinted**
 - **Amazon**
 
@@ -14,58 +13,71 @@ Program automatycznie pobiera, filtruje i ocenia oferty, odrzucając "śmieci" (
 
 ## 🚀 Jak zacząć?
 
-### 1. Instalacja
-Upewnij się, że masz Pythona i wymagane biblioteki:
+### 1. Wymagania
+Program wymaga zainstalowanego **Pythona 3.8+** oraz przeglądarki **Microsoft Edge** (używanej do symulowania zachowania człowieka).
+
+### 2. Instalacja zależności
+Otwórz terminal w folderze projektu i uruchom:
 ```bash
 pip install selenium xlsxwriter beautifulsoup4 thefuzz
 ```
 
-### 2. Konfiguracja szukania (`produkt.txt`)
-Wpisz frazy w pliku `produkt.txt` (każda w nowej linii).
-Możesz używać **minusów**, aby wykluczyć słowa!
+### 3. Konfiguracja (`produkt.txt`)
+Wpisz frazy, których szukasz, w pliku `produkt.txt`. Każda fraza w nowej linii.
+Możesz używać **minusów**, aby wykluczyć niechciane słowa (np. `-uszkodzony`).
 
-**Przykład:**
+**Przykład zawartości `produkt.txt`:**
 ```text
 iPhone 13 -etui -szkło
 PlayStation 5 -gra -digital
 MacBook Air M1
+Xiaomi watch 2 pro
 ```
-*Program automatycznie odrzuci też typowe śmieci jak "pudełko", "uszkodzony", "bateria" dzięki wbudowanemu Smart Filtrowi.*
 
-### 3. Uruchomienie
-Włącz program klikając w `main.py` lub wpisując w konsoli:
+### 4. Uruchomienie
+Aby uruchomić skaner, wpisz w konsoli:
 ```bash
 python main.py
 ```
+Program uruchomi przeglądarkę w tle, zacznie przeszukiwać serwisy i na bieżąco informować o postępach w konsoli.
 
 ---
 
-## 🧠 Jak działa Smart Filtr?
-Program nie pobiera wszystkiego jak leci. Posiada 3-stopniowy system weryfikacji:
-1.  **Globalna Czarna Lista**: Automatycznie usuwa tysiące śmieci (etui, kable, pudełka, uszkodzone).
-2.  **Wykluczenia Użytkownika**: Respektuje Twoje minusy (np. `-uszkodzony`).
-3.  **Fuzzy Logic**: Inteligentne dopasowanie tytułu. Jeśli szukasz "MacBook Air", program odrzuci "MacBook Pro", nawet jeśli sprzedawca użył mylącego opisu.
+## 🧠 Smart Filtr - Jak to działa?
+To nie jest zwykły scraper. Program posiada wielopoziomowy system weryfikacji jakości ofert:
 
-## 📊 Wyniki (`wyniki.xlsx`)
-Po zakończeniu pracy powstanie plik Excel z ofertami posortowanymi od najtańszej.
-- 🟢 **Zielony**: Nowy / Idealny
-- 🟡 **Żółty**: Używany
-- 🔴 **Czerwony**: Uszkodzony / Nieznany
+1.  **Globalna Czarna Lista (`filter.py`)**:
+    *   Automatycznie odrzuca setki słów oznaczających akcesoria (etui, pudełka, kable, paski) oraz uszkodzenia (uszkodzony, na części, zablokowany).
+2.  **Inteligentne czyszczenie parametrów**:
+    *   Program ignoruje parametry techniczne w tytułach, aby uniknąć pomyłek (np. `iPhone 16 GB` nie zostanie pomylony z `iPhone 16` tylko przez liczbę 16).
+3.  **Fuzzy Logic (TheFuzzy)**:
+    *   Algorytm rozmytego dopasowania tekstu wyłapuje literówki i mylące opisy.
+    *   Stosuje restrykcyjne dopasowanie dla krótkich słów kluczowych (np. "Air", "Pro", "Mini"), aby uniknąć fałszywych trafień.
+4.  **Wykluczenia użytkownika**:
+    *   Respektuje Twoje minusy z pliku konfiguracyjnego (np. `-powystawowy`).
 
 ---
 
-## 📂 Struktura plików
-- `main.py` - Główny silnik programu.
-- `modules/` - Skrypty pobierające dla każdego serwisu.
-- `utils/` - Logika filtrowania (`filter.py`) i zapisu (`excel_handler.py`).
-- `temp/` - Pliki tymczasowe (czyszczone automatycznie).
+## 📊 Wyniki i Raport Excel (`wyniki.xlsx`)
+Po zakończeniu pracy program generuje plik `wyniki.xlsx`, który otwiera się automatycznie.
 
-## 🛠️ Technologie i działanie
-Program został napisany w języku **Python** i wykorzystuje szereg nowoczesnych bibliotek do automatyzacji przeglądarki i przetwarzania danych:
-- **Selenium**: Do symulowania zachowania użytkownika i dynamicznego ładowania stron (szczególnie dla OLX i Vinted).
-- **BeautifulSoup4**: Do szybkiego i precyzyjnego parsowania kodu HTML i wyciągania kluczowych informacji (ceny, tytuły, linki).
-- **FuzzyWuzzy (TheFuzzy)**: Algorytmy rozmytego dopasowania tekstu pozwalają na inteligentne filtrowanie ogłoszeń, które nie pasują dokładnie do frazy, ale są z nią powiązane (lub wykluczanie tych, które są podobne do "ofert śmieciowych").
-- **Pandas/XlsxWriter**: Do generowania przejrzystych raportów w formacie Excel z kolorowaniem składni w zależności od stanu produktu.
+### Cechy raportu:
+*   **Sortowanie**: Oferty są automatycznie sortowane od najtańszej.
+*   **Kolorowanie składni**:
+    *   🟢 **Ciemna zieleń**: Nowy / Idealny
+    *   🟢 **Jasna zieleń**: Powystawowy / Bez metki
+    *   🟠 **Pomarańczowy/Żółty**: Używany (Dobry/Bardzo dobry)
+    *   🔴 **Czerwony**: Uszkodzony / Stan niezadowalający
+*   **Aktywne linki**: Możesz kliknąć w link, aby przejść bezpośrednio do oferty.
 
-### Architektura
-Projekt jest podzielony na niezależne moduły (`modules/`), co pozwala na łatwe dodawanie nowych serwisów. Każdy moduł posiada własny `fetcher` (pobieranie) i `parser` (analiza). Całością zarządza `main.py`, który orkiestruje proces wyszukiwania, filtrowania i zapisywania wyników.
+---
+
+## 📂 Struktura Techniczna
+
+*   `main.py` - Główny orkiestrator. Zarządza wątkami dla każdego serwisu i zbiera wyniki. Limituje pobieranie do **10 potwierdzonych ofert** na frazę per serwis (można zmienić zmienną `MAX_OFERT` w kodzie).
+*   `modules/` - Niezależne moduły dla każdego serwisu (API/Scrapery).
+    *   Każdy moduł (np. `allegro`) posiada `fetcher.py` (Selenium/Requests) oraz `parser.py` (BeautifulSoup4).
+*   `utils/`
+    *   `filter.py` - Logika "Smart Filtra" i fuzzy matchingu.
+    *   `excel_handler.py` - Generowanie raportu `.xlsx` z warunkowym formatowaniem.
+*   `temp/` - Katalog na tymczasowe pliki HTML (zapisywane podczas debugowania/rozwoju).
